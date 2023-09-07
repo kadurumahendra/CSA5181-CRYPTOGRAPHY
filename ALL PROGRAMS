@@ -1,0 +1,235 @@
+#include <stdio.h>
+#include <math.h>
+
+int gcd(int a, int h)
+{
+    int temp;
+    while (1)
+    {
+        temp = a % h;
+        if (temp == 0)
+            return h;
+        a = h;
+        h = temp;
+    }
+}
+
+int main()
+{
+    double p, q, n, pi, e, d, msg, c, m;
+
+    printf("Enter the value of p: ");
+    scanf("%lf", &p);
+
+    printf("Enter the value of q: ");
+    scanf("%lf", &q);
+
+    printf("Enter the message to encrypt: ");
+    scanf("%lf", &msg);
+
+    n = p * q;
+    pi = (p - 1) * (q - 1);
+    e = 2;
+    while (e < pi)
+    {
+        int count = gcd(e, pi);
+        if (count == 1)
+            break;
+        else
+            e++;
+    }
+
+    double k = 2;
+    d = (1 + (k * pi)) / e;
+
+    c = fmod(pow(msg, e), n);
+    m = fmod(pow(c, d), n);
+
+    printf("Message data = %lf\n", msg);
+    printf("p = %lf\n", p);
+    printf("q = %lf\n", q);
+    printf("n = pq = %lf\n", n);
+    printf("pi = %lf\n", pi);
+    printf("e = %lf\n", e);
+    printf("d = %lf\n", d);
+    printf("Encrypted data = %lf\n", c);
+    printf("Original Message Sent = %lf\n", m);
+
+    return 0;
+}
+DFA
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+unsigned long long int power(unsigned long long int base, unsigned long long int exponent, unsigned long long int modulus) {
+    unsigned long long int result = 1;
+    while (exponent > 0) {
+        if (exponent % 2 == 1) {
+            result = (result * base) % modulus;
+        }
+        base = (base * base) % modulus;
+        exponent /= 2;
+    }
+    return result;
+}
+
+int main() {
+    unsigned long long int p, g, privateA, privateB;
+    
+    printf("Enter prime number (q): ");
+    scanf("%llu", &p);
+    
+    printf("Enter primitive root (a): ");
+    scanf("%llu", &g);
+    
+    printf("Enter private key of XA: ");
+    scanf("%llu", &privateA);
+    
+    printf("Enter private key OF XB: ");
+    scanf("%llu", &privateB);
+
+    unsigned long long int publicA = power(g, privateA, p);
+    unsigned long long int publicB = power(g, privateB, p);
+
+    unsigned long long int secretA = power(publicB, privateA, p);
+    unsigned long long int secretB = power(publicA, privateB, p);
+
+    printf("Alice's public key: %llu\n", publicA);
+    printf("Bob's public key: %llu\n", publicB);
+    printf("Shared secret for Alice: %llu\n", secretA);
+    printf("Shared secret for Bob: %llu\n", secretB);
+
+    if (secretA == secretB) {
+        printf("Key exchange successful!\n");
+    } else {
+        printf("Key exchange failed!\n");
+    }
+
+    return 0;
+}
+HILL CIPHER
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#define SIZE 3
+
+void encrypt(int keyMatrix[][SIZE], int vector[], int result[]) {
+    for (int i = 0; i < SIZE; i++) {
+        result[i] = 0;
+        for (int j = 0; j < SIZE; j++) {
+            result[i] += keyMatrix[i][j] * vector[j];
+        }
+        result[i] %= 26; // Modulo 26 to keep within the range of letters
+    }
+}
+
+int main() {
+    int keyMatrix[SIZE][SIZE];
+    printf("Enter the key matrix (3x3):\n");
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            scanf("%d", &keyMatrix[i][j]);
+        }
+    }
+
+    char plaintext[100];
+    printf("Enter plaintext (uppercase letters only): ");
+    scanf("%s", plaintext);
+
+    int len = strlen(plaintext);
+    int paddedLen = len;
+
+    while (paddedLen % SIZE != 0) {
+        paddedLen++;
+    }
+
+    int vector[SIZE], encryptedVector[SIZE];
+    printf("Encrypted text: ");
+    for (int i = 0; i < paddedLen; i += SIZE) {
+        for (int j = 0; j < SIZE; j++) {
+            vector[j] = (i + j < len) ? plaintext[i + j] - 'A' : 0;
+        }
+
+        encrypt(keyMatrix, vector, encryptedVector);
+
+        for (int j = 0; j < SIZE; j++) {
+            printf("%c", encryptedVector[j] + 'A');
+        }
+    }
+    printf("\n");
+
+    return 0;
+}
+CASEAR CIPHER
+#include <stdio.h>
+#include <string.h>
+void caesarCipherEncrypt(char text[], int shift) {
+    for (int i = 0; i < strlen(text); i++) {
+        if (text[i] >= 'a' && text[i] <= 'z') {
+            text[i] = (text[i] - 'a' + shift) % 26 + 'a';
+        } else if (text[i] >= 'A' && text[i] <= 'Z') {
+            text[i] = (text[i] - 'A' + shift) % 26 + 'A';
+        }
+    }
+}
+void caesarDecrypt(char text[], int shift) {
+    caesarCipherEncrypt(text, 26 - shift);
+}
+
+int main() {
+    char text[100];
+    int shift;
+
+    printf("Enter a plaintext: ");
+    fgets(text, sizeof(text), stdin);
+
+    printf("Enter the shift value: ");
+    scanf("%d", &shift);
+
+    caesarCipherEncrypt(text, shift);
+
+    printf("Encrypted message: %s\n", text);
+    
+    caesarDecrypt(text,shift);
+    printf("Decrypt message: %s\n", text);
+    return 0;
+}
+POLY ALPHABETIC
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+void vigenereEncrypt(char *plaintext, char *key) {
+    int textLength = strlen(plaintext);
+    int keyLength = strlen(key);
+
+    for (int i = 0; i < textLength; i++) {
+        if (isalpha(plaintext[i])) {
+            char base = isupper(plaintext[i]) ? 'A' : 'a';
+            int keyIndex = i % keyLength;
+            int shift = tolower(key[keyIndex]) - 'a';
+            plaintext[i] = (plaintext[i] - base + shift) % 26 + base;
+        }
+    }
+}
+
+int main() {
+    char plaintext[1000];
+    char key[100];
+
+    printf("Enter the plaintext: ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+    plaintext[strcspn(plaintext, "\n")] = '\0';
+
+    printf("Enter the key: ");
+    scanf("%s", key);
+
+    vigenereEncrypt(plaintext, key);
+
+    printf("Encrypted text: %s\n", plaintext);
+
+    return 0;
+}
